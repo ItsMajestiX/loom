@@ -1,0 +1,31 @@
+{
+  "name": "loom",
+  "version": "1.0.0",
+  "description": "A bridge between the Polkadot network and the Arweave network.",
+  "main": "index.js",
+  "scripts": {
+    "build": "node generate:defs && node generate:meta",
+    "generate:defs": "ts-node --skip-project node_modules/.bin/polkadot-types-from-defs --package sample-polkadotjs-typegen/interfaces --input ./src/interfaces",
+    "generate:meta": "ts-node --skip-project node_modules/.bin/polkadot-types-from-chain --package sample-polkadotjs-typegen/interfaces --endpoint ./edgeware.json --output ./src/interfaces",
+    "lint": "tsc --noEmit --pretty"
+  },
+  "keywords": [
+    "arweave",
+    "polkadot"
+  ],
+  "author": "ItsMajestiX",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/async": "^3.2.5",
+    "@typescript-eslint/eslint-plugin": "^4.14.2",
+    "@typescript-eslint/parser": "^4.14.2",
+    "eslint": "^7.19.0",
+    "typescript": "^4.1.3"
+  },
+  "dependencies": {
+    "@polkadot/api": "^3.7.3",
+    "arweave-bundles": "^1.0.3",
+    "async": "^3.2.0",
+    "colors": "^1.4.0"
+  }
+}
