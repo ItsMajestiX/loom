@@ -9,7 +9,7 @@ const arBundles = ArweaveBundles({
     deepHash: deepHash,
 });
 
-export function compressBundle(bundle: DataItemJson[]): Promise<Buffer> {
+export function compressBundle(bundle: { items: DataItemJson[] }): Promise<Buffer> {
     return new Promise((resolve, reject) => {   
         zlib.brotliCompress(JSON.stringify(bundle), (err, buffer) => {
             if (err === null) {

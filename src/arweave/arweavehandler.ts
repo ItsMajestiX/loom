@@ -7,6 +7,13 @@ import { Block } from '../substrate/block';
 import { JWKPublicInterface }  from 'arweave-bundles/lib/interface-jwk'
 
 import colors from "colors/safe";
+import { compressBundle } from './compression';
+
+interface BundleSettings {
+    compressed: boolean;
+    startBlock: string;
+    endBlock: string;
+}
 
 export class ArweaveHandler {
     arBundles = ArweaveBundles({
@@ -65,6 +72,17 @@ export class ArweaveHandler {
         }
     }
 
+    private addBundleTags(txn: Transaction, settings: BundleSettings): void {
+        //required tags
+        txn.addTag('Bundle-Format', 'json');
+        txn.addTag('Bundle-Version', '1.0.0');
+        txn.addTag('Content-Type', 'application/json');
+
+        txn.addTag("compressed", settings.compressed ? "true" : "false");
+        txn.addTag("startBlock", settings.startBlock);
+        txn.addTag("endBlock", settings.startBlock);
+    }
+
     public async createTxnFromBlock(block: Block, asDataItem: boolean = false): Promise<Transaction | DataItemJson> {
         if (asDataItem) {
             let txn = await this.arBundles.createData({ data: JSON.stringify(block) }, this.wallet);
@@ -78,6 +96,22 @@ export class ArweaveHandler {
             await this.arweave.transactions.sign(txn, this.wallet);
             return txn;
         }
+    }
+    public async createTxnFromBundle(items: DataItemJson[], start: number, end: number, compress: boolean = true): Promise<Transaction> {
+        let txn: Transaction;
+        if (compress) {
+            txn = await this.arweave.createTransaction({ data: await compressBundle(await this.arBundles.bundleData(items)) }, this.wallet);
+        }
+        else {
+            txn = await this.arweave.createTransaction({ data: JSON.stringify(await this.arBundles.bundleData(items)) }, this.wallet);
+        }
+        this.addBundleTags(txn, {
+            compressed: compress,
+            startBlock: start.toString(),
+            endBlock: start.toString()
+        });
+        await this.arweave.transactions.sign(txn, this.wallet);
+        return txn;
     }
 
     public async submitTxn(txn: Transaction, callback: (callback: TransactionUploader) => void): Promise<void> {

@@ -4,9 +4,7 @@
   "description": "A bridge between the Polkadot network and the Arweave network.",
   "main": "index.js",
   "scripts": {
-    "build": "node generate:defs && node generate:meta",
-    "generate:defs": "ts-node --skip-project node_modules/.bin/polkadot-types-from-defs --package sample-polkadotjs-typegen/interfaces --input ./src/interfaces",
-    "generate:meta": "ts-node --skip-project node_modules/.bin/polkadot-types-from-chain --package sample-polkadotjs-typegen/interfaces --endpoint ./edgeware.json --output ./src/interfaces",
+    "build": "npx tsc",
     "lint": "tsc --noEmit --pretty"
   },
   "keywords": [
@@ -15,8 +13,10 @@
   ],
   "author": "ItsMajestiX",
   "license": "MIT",
+  "repository": "https://github.com/ItsMajestiX/loom",
   "devDependencies": {
     "@types/async": "^3.2.5",
+    "@types/yargs": "^16.0.0",
     "@typescript-eslint/eslint-plugin": "^4.14.2",
     "@typescript-eslint/parser": "^4.14.2",
     "eslint": "^7.19.0",
@@ -26,6 +26,7 @@
     "@polkadot/api": "^3.7.3",
     "arweave-bundles": "^1.0.3",
     "async": "^3.2.0",
-    "colors": "^1.4.0"
+    "colors": "^1.4.0",
+    "yargs": "^16.2.0"
   }
 }
