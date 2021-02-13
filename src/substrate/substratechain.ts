@@ -20,6 +20,11 @@ export class SubstrateChain {
         return constructed;
     }
 
+    public async getCurrentBlockNumber(): Promise<number> {
+        this.api = <ApiPromise>this.api;
+        return (await this.api.rpc.chain.getHeader()).number.toNumber();
+    }
+
     public async getBlock(number: number): Promise<Block> {
         this.api = <ApiPromise>this.api;
         let hash = await this.api.rpc.chain.getBlockHash(number);

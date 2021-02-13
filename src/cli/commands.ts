@@ -45,7 +45,6 @@ const raw = yargs(hideBin(process.argv)).options({
 		alias: "stream",
 		desc: "Enable streaming mode. As soon as your node recieves a new block, it will either be added to the current bundle or immidiately uploaded.",
 		conflicts: ['S', 'E'],
-		default: false,
 		type: "boolean"
 	},
 	b: {
@@ -87,11 +86,14 @@ function getArgs(): CommandType {
 		console.error(colors.red("ERROR: One of -l/--library or -a/--archive must be specifed."));
 		process.exit(-1);
 	}
-	if (raw.a) {
+	if (raw.a && raw.S === undefined) {
 		raw.S = 0;
 	}
 	if (!raw.l) {
 		raw.b = 10;
+	}
+	if (raw.s === undefined) {
+		raw.s === false;
 	}
 	return raw;
 }
@@ -119,7 +121,7 @@ export interface CommandType {
 	/**
 	 * stream
 	 */
-	s: boolean;
+	s: boolean | undefined;
 	/**
 	 * blocksize
 	 */

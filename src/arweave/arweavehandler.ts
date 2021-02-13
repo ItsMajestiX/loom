@@ -1,6 +1,6 @@
 import Arweave from 'arweave';
 import Transaction from 'arweave/node/lib/transaction';
-import { TransactionUploader } from 'arweave/node/lib/transaction-uploader';
+import { argv } from "../cli/commands";
 import deepHash from 'arweave/node/lib/deepHash';
 import ArweaveBundles, { DataItemJson } from 'arweave-bundles';
 import { Block } from '../substrate/block';
@@ -26,6 +26,7 @@ export class ArweaveHandler {
     wallet: JWKPublicInterface;
 
     public constructor(wallet: string) {
+        // Initialize Arweave connection and parse the wallet
         this.arweave = Arweave.init({
             host: 'arweave.net',
             port: 443,
@@ -40,6 +41,7 @@ export class ArweaveHandler {
         }
     }
 
+    // Two seperate methods for two different ways to add tags
     private addTransactionTags(block: Block, txn: Transaction): void {
         txn.addTag("number", block.number.toString());
     
@@ -73,16 +75,22 @@ export class ArweaveHandler {
     }
 
     private addBundleTags(txn: Transaction, settings: BundleSettings): void {
-        //required tags
+        // Required tags
         txn.addTag('Bundle-Format', 'json');
         txn.addTag('Bundle-Version', '1.0.0');
         txn.addTag('Content-Type', 'application/json');
 
+        // Extra data
         txn.addTag("compressed", settings.compressed ? "true" : "false");
         txn.addTag("startBlock", settings.startBlock);
         txn.addTag("endBlock", settings.startBlock);
     }
 
+    /**
+     * Turns a block object into either a Transaction or a DataItemJson.
+     * @param block The block to convert.
+     * @param asDataItem Whether to convert to a DataItemJson. Defaults to false.
+     */
     public async createTxnFromBlock(block: Block, asDataItem: boolean = false): Promise<Transaction | DataItemJson> {
         if (asDataItem) {
             let txn = await this.arBundles.createData({ data: JSON.stringify(block) }, this.wallet);
@@ -97,6 +105,15 @@ export class ArweaveHandler {
             return txn;
         }
     }
+
+    /**
+     * Takes a list of DataItemJson objects and bundles them into a Transaction.
+     * @param items List of DataItemJson objects.
+     * @param start Block number of earliest block.
+     * @param end Block number of last block.
+     * @param compress Whether to compress the block or not.
+     */
+
     public async createTxnFromBundle(items: DataItemJson[], start: number, end: number, compress: boolean = true): Promise<Transaction> {
         let txn: Transaction;
         if (compress) {
@@ -114,11 +131,25 @@ export class ArweaveHandler {
         return txn;
     }
 
-    public async submitTxn(txn: Transaction, callback: (callback: TransactionUploader) => void): Promise<void> {
+    /**
+     * Submits a transaction to Arweave and gives status reports.
+     * @param txn The transaction to send.
+     */
+    public async submitTxn(txn: Transaction): Promise<void> {
         let uploader = await this.arweave.transactions.getUploader(txn);
         while (!uploader.isComplete) {
             await uploader.uploadChunk();
-            callback(uploader);
+            if (!argv.t) {
+                if (uploader.isComplete) {
+                    console.log(colors.green("Uploaded data to Arweave. ID: " + txn.id));
+                }
+                else if (uploader.lastResponseError !== "") {
+                    console.log(colors.red("Error uploading blocks to Arweave. " + uploader.lastResponseError));
+                }
+                else {
+                    console.log(uploader.pctComplete.toString() + "% done uploading, " + uploader.uploadedChunks + '/' + uploader.totalChunks + ' chunks.');
+                }
+            }
         }
     }
     
