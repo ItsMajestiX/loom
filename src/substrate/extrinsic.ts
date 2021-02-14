@@ -26,7 +26,7 @@ export class BlockExtrinsic {
         this.from = extrinsic.extrinsic.signer.toString();
         this.nonce = extrinsic.extrinsic.nonce.toNumber();
         this.signature = extrinsic.extrinsic.signature.toHex();
-        
+
         this.success = isSuccess(extrinsic.events);
         this.eventRange = [eventStart, eventStart + extrinsic.events.length - 1]
     }

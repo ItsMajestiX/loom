@@ -10,7 +10,7 @@ const arBundles = ArweaveBundles({
 });
 
 export function compressBundle(bundle: { items: DataItemJson[] }): Promise<Buffer> {
-    return new Promise((resolve, reject) => {   
+    return new Promise((resolve, reject) => {
         zlib.brotliCompress(JSON.stringify(bundle), (err, buffer) => {
             if (err === null) {
                 resolve(buffer);
@@ -23,7 +23,7 @@ export function compressBundle(bundle: { items: DataItemJson[] }): Promise<Buffe
 }
 
 export function decompressBundle(bundle: DataItemJson[]): Promise<DataItemJson[]> {
-    return new Promise((resolve, reject) => {   
+    return new Promise((resolve, reject) => {
         zlib.brotliDecompress(JSON.stringify(bundle), (err, buffer) => {
             if (err === null) {
                 resolve(arBundles.unbundleData(buffer.toString()));

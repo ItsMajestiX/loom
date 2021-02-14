@@ -1,13 +1,15 @@
-import Arweave from 'arweave';
-import Transaction from 'arweave/node/lib/transaction';
-import { argv } from "../cli/commands";
-import deepHash from 'arweave/node/lib/deepHash';
-import ArweaveBundles, { DataItemJson } from 'arweave-bundles';
 import { Block } from '../substrate/block';
-import { JWKPublicInterface }  from 'arweave-bundles/lib/interface-jwk'
+import { compressBundle } from './compression';
+
+import Arweave from 'arweave/node';
+import Transaction from 'arweave/node/lib/transaction';
+import deepHash from 'arweave/node/lib/deepHash';
+import { ApiConfig } from 'arweave/node/lib/api';
+
+import ArweaveBundles, { DataItemJson } from 'arweave-bundles';
+import { JWKPublicInterface } from 'arweave-bundles/lib/interface-jwk'
 
 import colors from "colors/safe";
-import { compressBundle } from './compression';
 
 interface BundleSettings {
     compressed: boolean;
@@ -25,13 +27,13 @@ export class ArweaveHandler {
     arweave: Arweave;
     wallet: JWKPublicInterface;
 
-    public constructor(wallet: string) {
+    /**
+     * Creates a new instance of ArweaveHandler
+     * @param wallet A JSON string representing an Arweave wallet.
+     */
+    public constructor(config: ApiConfig, wallet: string) {
         // Initialize Arweave connection and parse the wallet
-        this.arweave = Arweave.init({
-            host: 'arweave.net',
-            port: 443,
-            protocol: 'https'
-        });
+        this.arweave = Arweave.init(config);
         try {
             this.wallet = <JWKPublicInterface>JSON.parse(wallet);
         }
@@ -44,12 +46,12 @@ export class ArweaveHandler {
     // Two seperate methods for two different ways to add tags
     private addTransactionTags(block: Block, txn: Transaction): void {
         txn.addTag("number", block.number.toString());
-    
+
         txn.addTag("hash", block.hash.toString());
         txn.addTag("parentHash", block.parentHash.toString());
         txn.addTag("stateRoot", block.stateRoot.toString());
         txn.addTag("extrinsicsRoot", block.extrinsicsRoot.toString());
-        
+
         if (block.time !== undefined) {
             txn.addTag("time", block.time.toString());
         }
@@ -60,12 +62,12 @@ export class ArweaveHandler {
 
     private addDataItemTags(block: Block, txn: DataItemJson): void {
         this.arBundles.addTag(txn, "number", block.number.toString());
-    
+
         this.arBundles.addTag(txn, "hash", block.hash.toString());
         this.arBundles.addTag(txn, "parentHash", block.parentHash.toString());
         this.arBundles.addTag(txn, "stateRoot", block.stateRoot.toString());
         this.arBundles.addTag(txn, "extrinsicsRoot", block.extrinsicsRoot.toString());
-        
+
         if (block.time !== undefined) {
             this.arBundles.addTag(txn, "time", block.time.toString());
         }
@@ -139,18 +141,15 @@ export class ArweaveHandler {
         let uploader = await this.arweave.transactions.getUploader(txn);
         while (!uploader.isComplete) {
             await uploader.uploadChunk();
-            if (!argv.t) {
-                if (uploader.isComplete) {
-                    console.log(colors.green("Uploaded data to Arweave. ID: " + txn.id));
-                }
-                else if (uploader.lastResponseError !== "") {
-                    console.log(colors.red("Error uploading blocks to Arweave. " + uploader.lastResponseError));
-                }
-                else {
-                    console.log(uploader.pctComplete.toString() + "% done uploading, " + uploader.uploadedChunks + '/' + uploader.totalChunks + ' chunks.');
-                }
+            if (uploader.isComplete) {
+                console.log(colors.green("Uploaded data to Arweave. ID: " + txn.id));
+            }
+            else if (uploader.lastResponseError !== "") {
+                console.log(colors.red("Error uploading blocks to Arweave. " + uploader.lastResponseError));
+            }
+            else {
+                console.log(uploader.pctComplete.toString() + "% done uploading, " + uploader.uploadedChunks + '/' + uploader.totalChunks + ' chunks.');
             }
         }
     }
-    
 }

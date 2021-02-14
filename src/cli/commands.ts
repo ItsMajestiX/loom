@@ -1,5 +1,7 @@
-import yargs, { choices } from 'yargs';
 import fs from 'fs';
+
+import yargs, { choices } from 'yargs';
+
 import colors from "colors/safe";
 
 //esm doesn't work for some reason
@@ -11,7 +13,7 @@ const raw = yargs(hideBin(process.argv)).options({
 		alias: "key",
 		demandOption: "Please specify a path to your Arweave keyfile.",
 		desc: "The location of your Arweave keyfile.",
-		coerce: (arg) => { 
+		coerce: (arg) => {
 			try {
 				return fs.readFileSync(arg, 'utf8')
 			}
@@ -27,6 +29,20 @@ const raw = yargs(hideBin(process.argv)).options({
 		demandOption: "Please specify the websocket addresses of a substrate node running in archive mode to pull block data from.",
 		desc: "A websocket URL of a substrate node running in archive node.",
 		type: "string"
+	},
+	A: {
+		alias: "arweave",
+		desc: "The URL of the Arweave node to connect to. Should contain a protocol and port as well as the hostname.",
+		default: "https://arweave.net:443",
+		coerce: (arg) => {
+			try {
+				return new URL(arg);
+			}
+			catch (e) {
+				console.error(colors.red("There was an error processing your Arweave URL: " + e));
+				process.exit(-1);
+			}
+		}
 	},
 	l: {
 		alias: "library",
@@ -79,6 +95,12 @@ const raw = yargs(hideBin(process.argv)).options({
 		default: true,
 		type: "boolean"
 	},
+	d: {
+		alias: "datadir",
+		desc: "The directory to save temp data to, such as downloaded blocks and program state. Will be created if it does not exist.",
+		default: "./.loomdata/",
+		type: "string"
+	}
 }).argv;
 
 function getArgs(): CommandType {
@@ -110,6 +132,10 @@ export interface CommandType {
 	 * node
 	 */
 	n: string;
+	/**
+	 * Arweave
+	 */
+	A: URL;
 	/**
 	 * library
 	 */

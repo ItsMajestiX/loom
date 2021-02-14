@@ -1,5 +1,6 @@
-import { ApiPromise, WsProvider } from "@polkadot/api";
 import { Block } from "./block";
+
+import { ApiPromise, WsProvider } from "@polkadot/api";
 import { SignedBlockExtended } from "@polkadot/api-derive"
 import { VoidFn } from "@polkadot/api/types";
 
@@ -11,6 +12,10 @@ export class SubstrateChain {
         this.api = ApiPromise.create({ provider: wsProvider }).catch((e) => { console.error(e); });
     }
 
+    /**
+     * Creates a new instance of SubstrateChain
+     * @param wsUrl The WebSockets RPC URL of the node to connect to.
+     */
     public static async create(wsUrl: string): Promise<SubstrateChain | undefined> {
         let constructed = new SubstrateChain(wsUrl);
         constructed.api = await constructed.api;
@@ -20,11 +25,18 @@ export class SubstrateChain {
         return constructed;
     }
 
+    /**
+     * Gets the current block number.
+     */
     public async getCurrentBlockNumber(): Promise<number> {
         this.api = <ApiPromise>this.api;
         return (await this.api.rpc.chain.getHeader()).number.toNumber();
     }
 
+    /**
+     * Gets the specified block.
+     * @param number The block to get.
+     */
     public async getBlock(number: number): Promise<Block> {
         this.api = <ApiPromise>this.api;
         let hash = await this.api.rpc.chain.getBlockHash(number);
@@ -32,6 +44,10 @@ export class SubstrateChain {
         return new Block(block!, hash!);
     }
 
+    /**
+     * Listens for new blocks and calls a callback function when one is recieved.
+     * @param callback The function to call when a new block is recieved. Funtion must take one parameter of type Block and return void.
+     */
     public async livestreamBlocks(callback: (block: Block) => void | Promise<void>): Promise<VoidFn> {
         this.api = <ApiPromise>this.api;
         return await this.api.derive.chain.subscribeNewBlocks((block) => {

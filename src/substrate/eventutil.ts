@@ -1,4 +1,4 @@
-import type {DispatchError, DispatchInfo, Event, Extrinsic} from '@polkadot/types/interfaces';
+import type { DispatchError, DispatchInfo, Event, Extrinsic } from '@polkadot/types/interfaces';
 
 //copied from type definitions because it's private
 export interface TxWithEvent {
