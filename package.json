@@ -24,11 +24,9 @@
   },
   "dependencies": {
     "@polkadot/api": "^3.7.3",
-    "@types/hidefile": "^3.0.0",
     "arweave-bundles": "^1.0.3",
     "async": "^3.2.0",
     "colors": "^1.4.0",
-    "hidefile": "^3.0.0",
     "yargs": "^16.2.0"
   }
 }

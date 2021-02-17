@@ -37,8 +37,8 @@ export class ArweaveHandler {
         try {
             this.wallet = <JWKPublicInterface>JSON.parse(wallet);
         }
-        catch {
-            console.error(colors.red("ERROR: The JSON file that was provided does not contain a valid Arweave private key."))
+        catch (e) {
+            console.error(colors.red(e))
             process.exit(-1);
         }
     }

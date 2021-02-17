@@ -1,7 +1,12 @@
+import zlib from "zlib";
+import util from "util";
+
 import Arweave from 'arweave';
 import deepHash from 'arweave/node/lib/deepHash';
+
 import ArweaveBundles, { DataItemJson } from "arweave-bundles";
-import zlib from "zlib";
+
+import colors from "colors/safe";
 
 const arBundles = ArweaveBundles({
     utils: Arweave.utils,
@@ -9,28 +14,25 @@ const arBundles = ArweaveBundles({
     deepHash: deepHash,
 });
 
-export function compressBundle(bundle: { items: DataItemJson[] }): Promise<Buffer> {
-    return new Promise((resolve, reject) => {
-        zlib.brotliCompress(JSON.stringify(bundle), (err, buffer) => {
-            if (err === null) {
-                resolve(buffer);
-            }
-            else {
-                reject(err);
-            }
-        })
-    })
+export async function compressBundle(bundle: { items: DataItemJson[] }): Promise<Buffer> {
+    let brotliCompressPromise = util.promisify(zlib.brotliCompress);
+    try {
+        return await brotliCompressPromise(JSON.stringify(bundle));
+    }
+    catch (e) {
+        console.error(colors.red("Error compressing bundle: " + e));
+        process.exit(-1);
+    }
 }
 
-export function decompressBundle(bundle: DataItemJson[]): Promise<DataItemJson[]> {
-    return new Promise((resolve, reject) => {
-        zlib.brotliDecompress(JSON.stringify(bundle), (err, buffer) => {
-            if (err === null) {
-                resolve(arBundles.unbundleData(buffer.toString()));
-            }
-            else {
-                reject(err);
-            }
-        })
-    })
+export async function decompressBundle(bundle: string): Promise<DataItemJson[]> {
+    let brotliDecompressPromise = util.promisify(zlib.brotliDecompress);
+    try {
+        let data = await brotliDecompressPromise(bundle);
+        return arBundles.unbundleData(data);
+    }
+    catch (e) {
+        console.error(colors.red("Error decompressing bundle: " + e));
+        process.exit(-1);
+    }
 }

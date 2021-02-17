@@ -1,11 +1,10 @@
 import fs from 'fs';
 
 import yargs, { choices } from 'yargs';
-
-import colors from "colors/safe";
-
 //esm doesn't work for some reason
 const { hideBin } = require('yargs/helpers');
+
+import colors from "colors/safe";
 
 
 const raw = yargs(hideBin(process.argv)).options({
@@ -15,7 +14,12 @@ const raw = yargs(hideBin(process.argv)).options({
 		desc: "The location of your Arweave keyfile.",
 		coerce: (arg) => {
 			try {
-				return fs.readFileSync(arg, 'utf8')
+				let file = fs.readFileSync(arg);
+				if (file === undefined) {
+					console.error(colors.red("Your Arweave keyfile could not be read."));
+					process.exit(-1);
+				}
+				return file.toString();
 			}
 			catch (e) {
 				console.error(colors.red("There was an error reading your Arweave keyfile: " + e));
@@ -168,6 +172,10 @@ export interface CommandType {
 	 * test
 	 */
 	t: boolean;
+	/**
+	 * datadir
+	 */
+	d: string;
 	_: (string | number)[];
 	$0: string;
 }
