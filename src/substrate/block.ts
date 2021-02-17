@@ -6,21 +6,21 @@ import { SignedBlockExtended } from "@polkadot/api-derive/type";
 import { BlockHash } from "@polkadot/types/interfaces";
 
 export class Block {
-    time: number | undefined;
-    number: number;
+    readonly time: number | undefined;
+    readonly number: number;
 
-    hash: BlockHash;
-    parentHash: BlockHash;
-    stateRoot: BlockHash;
-    extrinsicsRoot: BlockHash;
+    readonly hash: BlockHash;
+    readonly parentHash: BlockHash;
+    readonly stateRoot: BlockHash;
+    readonly extrinsicsRoot: BlockHash;
 
-    author: string | undefined;
+    readonly author: string | undefined;
 
-    extrinsics: BlockExtrinsic[];
-    events: BlockEvent[];
-    logs: BlockLog[];
+    readonly extrinsics: BlockExtrinsic[];
+    readonly events: BlockEvent[];
+    readonly logs: BlockLog[];
 
-    constructor(block: SignedBlockExtended, hash: BlockHash) {
+    constructor(block: SignedBlockExtended, hash: BlockHash, chain: string, genHash: string) {
         if (block?.block.extrinsics.length) {
             this.time = +block?.block.extrinsics[0].args[0].toString();
         }
@@ -37,7 +37,7 @@ export class Block {
         this.events = new Array<BlockEvent>();
         this.logs = new Array<BlockLog>();
 
-        block.extrinsics.forEach((extrisic, index, array) => {
+        block.extrinsics.forEach((extrisic, index) => {
             this.extrinsics.push(new BlockExtrinsic(extrisic, index, eventCount));
             extrisic.events.forEach((e) => {
                 this.events.push(new BlockEvent(e, eventCount, index));

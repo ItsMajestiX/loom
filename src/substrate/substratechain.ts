@@ -1,15 +1,21 @@
 import { Block } from "./block";
 
 import { ApiPromise, WsProvider } from "@polkadot/api";
-import { SignedBlockExtended } from "@polkadot/api-derive"
 import { VoidFn } from "@polkadot/api/types";
 
-export class SubstrateChain {
-    api: Promise<ApiPromise | void> | ApiPromise | void;
+import colors from "colors/safe";
 
-    private constructor(wsUrl: string) {
-        const wsProvider = new WsProvider(wsUrl);
-        this.api = ApiPromise.create({ provider: wsProvider }).catch((e) => { console.error(e); });
+export class SubstrateChain {
+    readonly api: ApiPromise
+
+    readonly chain: string;
+
+    readonly genHash: string;
+
+    private constructor(api: ApiPromise, chain: string, genHash: string) {
+        this.api = api
+        this.chain = chain
+        this.genHash = genHash
     }
 
     /**
@@ -17,12 +23,18 @@ export class SubstrateChain {
      * @param wsUrl The WebSockets RPC URL of the node to connect to.
      */
     public static async create(wsUrl: string): Promise<SubstrateChain | undefined> {
-        let constructed = new SubstrateChain(wsUrl);
-        constructed.api = await constructed.api;
-        if (!(constructed.api instanceof ApiPromise)) {
-            return undefined;
+        const wsProvider = new WsProvider(wsUrl);
+        try {
+            const api = await ApiPromise.create({ provider: wsProvider });
+            const constructed = new SubstrateChain(api, api.genesisHash.toHex(), (await api.rpc.system.chain()).toString());
+            if (!(constructed.api instanceof ApiPromise)) {
+                return undefined;
+            }
+            return constructed;
         }
-        return constructed;
+        catch (e) {
+            console.error(colors.red("Error connecting to Substrate node: " + e))
+        }
     }
 
     /**
@@ -39,9 +51,9 @@ export class SubstrateChain {
      */
     public async getBlock(number: number): Promise<Block> {
         this.api = <ApiPromise>this.api;
-        let hash = await this.api.rpc.chain.getBlockHash(number);
-        let block = await this.api.derive.chain.getBlock(hash);
-        return new Block(block!, hash!);
+        const hash = await this.api.rpc.chain.getBlockHash(number);
+        const block = await this.api.derive.chain.getBlock(hash);
+        return new Block(block!, hash!, chain, this.api.genesisHash.toHex());
     }
 
     /**
@@ -51,7 +63,8 @@ export class SubstrateChain {
     public async livestreamBlocks(callback: (block: Block) => void | Promise<void>): Promise<VoidFn> {
         this.api = <ApiPromise>this.api;
         return await this.api.derive.chain.subscribeNewBlocks((block) => {
-            callback(new Block(block, block.block.header.hash));
+            this.api = <ApiPromise>this.api;
+            callback(new Block(block, block.block.header.hash,));
         });
     }
 }

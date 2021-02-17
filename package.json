@@ -1,19 +1,27 @@
 {
-  "name": "loom",
-  "version": "1.0.0",
+  "name": "@itsmajestix/loom",
+  "version": "0.1.0",
   "description": "A bridge between the Polkadot network and the Arweave network.",
-  "main": "index.js",
+  "main": "./out/index.js",
+  "types": "./out/index.d.ts",
   "scripts": {
     "build": "npx tsc",
     "lint": "tsc --noEmit --pretty"
   },
+  "bin": {
+    "loom": "./out/main.js"
+  },
+  "files": [
+    "out",
+    "README.md"
+  ],
   "keywords": [
     "arweave",
     "polkadot"
   ],
   "author": "ItsMajestiX",
   "license": "MIT",
-  "repository": "https://github.com/ItsMajestiX/loom",
+  "repository": "git://github.com/ItsMajestiX/loom.git",
   "devDependencies": {
     "@types/async": "^3.2.5",
     "@types/yargs": "^16.0.0",

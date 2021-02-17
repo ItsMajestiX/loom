@@ -1,19 +1,19 @@
 import { isSuccess, TxWithEvent } from './eventutil';
 
 export class BlockExtrinsic {
-    index: number;
-    hash: string;
-    module: string;
-    method: string;
+    readonly index: number;
+    readonly hash: string;
+    readonly module: string;
+    readonly method: string;
 
-    data: string;
+    readonly data: string;
 
-    from: string;
-    nonce: number;
-    signature: string;
+    readonly from: string;
+    readonly nonce: number;
+    readonly signature: string;
 
-    success: boolean;
-    eventRange: [number, number];
+    readonly success: boolean;
+    readonly eventRange: [number, number];
 
     constructor(extrinsic: TxWithEvent, index: number, eventStart: number) {
         this.index = index;

@@ -15,7 +15,7 @@ const arBundles = ArweaveBundles({
 });
 
 export async function compressBundle(bundle: { items: DataItemJson[] }): Promise<Buffer> {
-    let brotliCompressPromise = util.promisify(zlib.brotliCompress);
+    const brotliCompressPromise = util.promisify(zlib.brotliCompress);
     try {
         return await brotliCompressPromise(JSON.stringify(bundle));
     }
@@ -26,9 +26,9 @@ export async function compressBundle(bundle: { items: DataItemJson[] }): Promise
 }
 
 export async function decompressBundle(bundle: string): Promise<DataItemJson[]> {
-    let brotliDecompressPromise = util.promisify(zlib.brotliDecompress);
+    const brotliDecompressPromise = util.promisify(zlib.brotliDecompress);
     try {
-        let data = await brotliDecompressPromise(bundle);
+        const data = await brotliDecompressPromise(bundle);
         return arBundles.unbundleData(data);
     }
     catch (e) {

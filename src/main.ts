@@ -1,18 +1,18 @@
 import { SubstrateChain } from "./substrate/substratechain";
 import { ArweaveHandler } from "./arweave/arweavehandler"
-import Transaction from 'arweave/node/lib/transaction';;
+import Transaction from 'arweave/node/lib/transaction';
 import { DataItemJson } from "arweave-bundles";
 import { argv } from "./cli/commands";
 import { FileManager } from "./cli/files";
 
 async function main(): Promise<void> {
-    let substrate = await SubstrateChain.create(argv.n);
-    let arweave = await new ArweaveHandler({
+    const substrate = await SubstrateChain.create(argv.n);
+    const arweave = await new ArweaveHandler({
         host: argv.A.hostname,
         port: argv.A.port,
         protocol: argv.A.protocol.slice(0, argv.A.protocol.length - 2)
     }, argv.k);
-    let files = new FileManager(argv.d);
+    const files = new FileManager(argv.d);
 
 
     let s = Infinity;
@@ -30,7 +30,7 @@ async function main(): Promise<void> {
         for (let i = argv.S!; i <= argv.E!; i++) {
             // Library mode check
             if (argv.l) {
-                let txn = <Transaction>await arweave.createTxnFromBlock(await substrate!.getBlock(i)!, false);
+                const txn = <Transaction>await arweave.createTxnFromBlock(await substrate!.getBlock(i)!, false);
                 // Test mode check
                 if (!argv.t) {
                     arweave.submitTxn(txn);
@@ -41,8 +41,8 @@ async function main(): Promise<void> {
             }
             else {
                 // Get a block and save it
-                let block = await substrate!.getBlock(i);
-                let dataItem = <DataItemJson>await arweave.createTxnFromBlock(block, true);
+                const block = await substrate!.getBlock(i);
+                const dataItem = <DataItemJson>await arweave.createTxnFromBlock(block, true);
                 await files.writeBlock(dataItem, block!.number);
 
                 // Increment block counter, print info
@@ -60,7 +60,7 @@ async function main(): Promise<void> {
                     // Read blocks from disk
                     let blocks = new Array<DataItemJson>();
                     for (let i = s; i <= e; i++) {
-                        let block = await files.readBlock(i);
+                        const block = await files.readBlock(i);
                         if (block === undefined) {
                             blocks.push(<DataItemJson>await arweave.createTxnFromBlock(await substrate!.getBlock(i), true));
                         }
@@ -68,7 +68,7 @@ async function main(): Promise<void> {
                             blocks.push(block);
                         }
                     }
-                    let txn = await arweave.createTxnFromBundle(blocks, s, e, true);
+                    const txn = await arweave.createTxnFromBundle(blocks, s, e, true);
                     // Test mode check
                     if (!argv.t) {
                         arweave.submitTxn(txn);
@@ -92,7 +92,7 @@ async function main(): Promise<void> {
         substrate!.livestreamBlocks(async (block) => {
             // Library mode check
             if (argv.l) {
-                let txn = <Transaction>await arweave.createTxnFromBlock(block, false);
+                const txn = <Transaction>await arweave.createTxnFromBlock(block, false);
                 // Test mode check
                 if (!argv.t) {
                     arweave.submitTxn(txn);
@@ -103,7 +103,7 @@ async function main(): Promise<void> {
             }
             else {
                 // Save block
-                let dataItem = <DataItemJson>await arweave.createTxnFromBlock(block, true);
+                const dataItem = <DataItemJson>await arweave.createTxnFromBlock(block, true);
                 await files.writeBlock(dataItem, block.number);
 
                 // Increment block counter, print info
@@ -121,7 +121,7 @@ async function main(): Promise<void> {
                     // Read blocks from disk
                     let blocks = new Array<DataItemJson>();
                     for (let i = s; i <= e; i++) {
-                        let block = await files.readBlock(i);
+                        const block = await files.readBlock(i);
                         if (block === undefined) {
                             blocks.push(<DataItemJson>await arweave.createTxnFromBlock(await substrate!.getBlock(i), true));
                         }
@@ -129,7 +129,7 @@ async function main(): Promise<void> {
                             blocks.push(block);
                         }
                     }
-                    let txn = await arweave.createTxnFromBundle(blocks, s, e, true);
+                    const txn = await arweave.createTxnFromBundle(blocks, s, e, true);
                     // Test mode check
                     if (!argv.t) {
                         arweave.submitTxn(txn);

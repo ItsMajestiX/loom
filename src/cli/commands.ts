@@ -1,20 +1,18 @@
 import fs from 'fs';
 
-import yargs, { choices } from 'yargs';
-//esm doesn't work for some reason
-const { hideBin } = require('yargs/helpers');
+import yargs from 'yargs';
 
 import colors from "colors/safe";
 
 
-const raw = yargs(hideBin(process.argv)).options({
+const raw = yargs(process.argv.slice(2)).options({
 	k: {
 		alias: "key",
 		demandOption: "Please specify a path to your Arweave keyfile.",
 		desc: "The location of your Arweave keyfile.",
 		coerce: (arg) => {
 			try {
-				let file = fs.readFileSync(arg);
+				const file = fs.readFileSync(arg);
 				if (file === undefined) {
 					console.error(colors.red("Your Arweave keyfile could not be read."));
 					process.exit(-1);

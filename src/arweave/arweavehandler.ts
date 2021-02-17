@@ -18,14 +18,14 @@ interface BundleSettings {
 }
 
 export class ArweaveHandler {
-    arBundles = ArweaveBundles({
+    readonly arBundles = ArweaveBundles({
         utils: Arweave.utils,
         crypto: Arweave.crypto,
         deepHash: deepHash,
     });
 
-    arweave: Arweave;
-    wallet: JWKPublicInterface;
+    readonly arweave: Arweave;
+    readonly wallet: JWKPublicInterface;
 
     /**
      * Creates a new instance of ArweaveHandler
@@ -93,15 +93,15 @@ export class ArweaveHandler {
      * @param block The block to convert.
      * @param asDataItem Whether to convert to a DataItemJson. Defaults to false.
      */
-    public async createTxnFromBlock(block: Block, asDataItem: boolean = false): Promise<Transaction | DataItemJson> {
+    public async createTxnFromBlock(block: Block, asDataItem = false): Promise<Transaction | DataItemJson> {
         if (asDataItem) {
-            let txn = await this.arBundles.createData({ data: JSON.stringify(block) }, this.wallet);
+            const txn = await this.arBundles.createData({ data: JSON.stringify(block) }, this.wallet);
             this.addDataItemTags(block, txn);
             await this.arBundles.sign(txn, this.wallet);
             return txn;
         }
         else {
-            let txn = await this.arweave.createTransaction({ data: JSON.stringify(block) }, this.wallet);
+            const txn = await this.arweave.createTransaction({ data: JSON.stringify(block) }, this.wallet);
             this.addTransactionTags(block, txn);
             await this.arweave.transactions.sign(txn, this.wallet);
             return txn;
@@ -116,7 +116,7 @@ export class ArweaveHandler {
      * @param compress Whether to compress the block or not.
      */
 
-    public async createTxnFromBundle(items: DataItemJson[], start: number, end: number, compress: boolean = true): Promise<Transaction> {
+    public async createTxnFromBundle(items: DataItemJson[], start: number, end: number, compress = true): Promise<Transaction> {
         let txn: Transaction;
         if (compress) {
             txn = await this.arweave.createTransaction({ data: await compressBundle(await this.arBundles.bundleData(items)) }, this.wallet);
@@ -138,7 +138,7 @@ export class ArweaveHandler {
      * @param txn The transaction to send.
      */
     public async submitTxn(txn: Transaction): Promise<void> {
-        let uploader = await this.arweave.transactions.getUploader(txn);
+        const uploader = await this.arweave.transactions.getUploader(txn);
         while (!uploader.isComplete) {
             await uploader.uploadChunk();
             if (uploader.isComplete) {

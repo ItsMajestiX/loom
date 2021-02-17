@@ -1,8 +1,8 @@
 export class BlockLog {
-    index: number;
+    readonly index: number;
 
-    type: string;
-    value: string;
+    readonly type: string;
+    readonly value: string;
 
     constructor(type: string, value: string, index: number) {
         this.type = type;

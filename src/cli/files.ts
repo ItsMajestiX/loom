@@ -19,7 +19,7 @@ export class FileManager {
             fs.statSync(dir);
         }
         catch (e) {
-            let cast = <NodeJS.ErrnoException>e;
+            const cast = <NodeJS.ErrnoException>e;
             if (cast.code === "ENOENT") {
                 try {
                     fs.mkdirSync(dir);
@@ -38,8 +38,8 @@ export class FileManager {
 
     private async fileExists(filepath: string): Promise<boolean> {
         try {
-            let success = true;
-            let statPromise = util.promisify(fs.stat);
+            const success = true;
+            const statPromise = util.promisify(fs.stat);
             await statPromise(filepath);
             return success;
         }
@@ -50,9 +50,9 @@ export class FileManager {
     }
 
     public async readBlock(number: number): Promise<DataItemJson | undefined> {
-        let newPath = path.join(this.dirPath, number.toString() + ".block");
+        const newPath = path.join(this.dirPath, number.toString() + ".block");
         if (await this.fileExists(newPath)) {
-            let readFilePromise = util.promisify(fs.readFile);
+            const readFilePromise = util.promisify(fs.readFile);
             let fileData: string;
             try {
                 fileData = (await readFilePromise(newPath)).toString();
@@ -75,8 +75,8 @@ export class FileManager {
     }
 
     public async writeBlock(block: DataItemJson, number: number): Promise<void> {
-        let newPath = path.join(this.dirPath, number.toString() + ".block");
-        let writeFilePromise = util.promisify(fs.writeFile);
+        const newPath = path.join(this.dirPath, number.toString() + ".block");
+        const writeFilePromise = util.promisify(fs.writeFile);
         try {
             await writeFilePromise(newPath, JSON.stringify(block));
         }
@@ -87,8 +87,8 @@ export class FileManager {
     }
 
     public async wipeBlocks(): Promise<void> {
-        let readdirPromise = util.promisify(fs.readdir);
-        let rmPromise = util.promisify(fs.rm);
+        const readdirPromise = util.promisify(fs.readdir);
+        const rmPromise = util.promisify(fs.rm);
         let files: string[];
         try {
             files = (await readdirPromise(this.dirPath)).filter(value => value.endsWith(".block"));
@@ -98,7 +98,7 @@ export class FileManager {
             process.exit(-1);
         }
         async.each(files, async (file) => {
-            let newPath = path.join(this.dirPath, file);
+            const newPath = path.join(this.dirPath, file);
             try {
                 await rmPromise(newPath);
             }

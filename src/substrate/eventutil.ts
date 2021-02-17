@@ -9,6 +9,6 @@ export interface TxWithEvent {
 }
 
 export function isSuccess(events: Event[]): boolean {
-    let finalEvent = events[events.length - 1];
+    const finalEvent = events[events.length - 1];
     return finalEvent.method === "ExtrinsicSuccess"
 }

@@ -1,13 +1,13 @@
 import type { Event } from '@polkadot/types/interfaces';
 
 export class BlockEvent {
-    index: number;
-    extrinsic: number;
+    readonly index: number;
+    readonly extrinsic: number;
 
-    module: string;
-    method: string;
+    readonly module: string;
+    readonly method: string;
 
-    data: string;
+    readonly data: string;
 
     constructor(event: Event, index: number, extrinsicIndex: number) {
         this.index = index;
