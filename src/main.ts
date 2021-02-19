@@ -8,9 +8,9 @@ import { FileManager } from "./cli/files";
 async function main(): Promise<void> {
     const substrate = await SubstrateChain.create(argv.n);
     const arweave = await new ArweaveHandler({
-        host: argv.A.hostname,
-        port: argv.A.port,
-        protocol: argv.A.protocol.slice(0, argv.A.protocol.length - 2)
+        host: argv.a.hostname,
+        port: argv.a.port,
+        protocol: argv.a.protocol.slice(0, argv.a.protocol.length - 2)
     }, argv.k);
     const files = new FileManager(argv.d);
 
@@ -21,15 +21,15 @@ async function main(): Promise<void> {
 
     let streamWhenDone = false;
 
-    if (argv.s === undefined) {
+    if (!argv.s) {
         // Block loop
-        if (argv.E === undefined) {
-            argv.E = await substrate!.getCurrentBlockNumber();
+        if (!argv.e) {
+            argv.e = await substrate!.getCurrentBlockNumber();
             streamWhenDone = true;
         }
-        for (let i = argv.S!; i <= argv.E!; i++) {
+        for (let i = argv.s!; i <= argv.e!; i++) {
             // Library mode check
-            if (argv.l) {
+            if (argv.library) {
                 const txn = <Transaction>await arweave.createTxnFromBlock(await substrate!.getBlock(i)!, false);
                 // Test mode check
                 if (!argv.t) {
@@ -68,7 +68,7 @@ async function main(): Promise<void> {
                             blocks.push(block);
                         }
                     }
-                    const txn = await arweave.createTxnFromBundle(blocks, s, e, true);
+                    const txn = await arweave.createTxnFromBundle(blocks, substrate!.chain, substrate!.genHash, s, e, true);
                     // Test mode check
                     if (!argv.t) {
                         arweave.submitTxn(txn);
@@ -129,7 +129,7 @@ async function main(): Promise<void> {
                             blocks.push(block);
                         }
                     }
-                    const txn = await arweave.createTxnFromBundle(blocks, s, e, true);
+                    const txn = await arweave.createTxnFromBundle(blocks, substrate!.chain, substrate!.genHash, s, e, true);
                     // Test mode check
                     if (!argv.t) {
                         arweave.submitTxn(txn);
@@ -150,4 +150,9 @@ async function main(): Promise<void> {
     }
 }
 
-main();
+try {
+    main();
+}
+catch {
+    process.exit(-1);
+}

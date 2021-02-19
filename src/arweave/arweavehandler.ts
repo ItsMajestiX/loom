@@ -15,6 +15,8 @@ interface BundleSettings {
     compressed: boolean;
     startBlock: string;
     endBlock: string;
+    chain: string;
+    genHash: string;
 }
 
 export class ArweaveHandler {
@@ -39,12 +41,14 @@ export class ArweaveHandler {
         }
         catch (e) {
             console.error(colors.red(e))
-            process.exit(-1);
+            throw new Error();
         }
     }
 
     // Two seperate methods for two different ways to add tags
     private addTransactionTags(block: Block, txn: Transaction): void {
+        txn.addTag("chain", block.chain);
+        txn.addTag("genHash", block.genHash);
         txn.addTag("number", block.number.toString());
 
         txn.addTag("hash", block.hash.toString());
@@ -83,6 +87,8 @@ export class ArweaveHandler {
         txn.addTag('Content-Type', 'application/json');
 
         // Extra data
+        txn.addTag("chain", settings.chain);
+        txn.addTag("genHash", settings.genHash);
         txn.addTag("compressed", settings.compressed ? "true" : "false");
         txn.addTag("startBlock", settings.startBlock);
         txn.addTag("endBlock", settings.startBlock);
@@ -111,12 +117,14 @@ export class ArweaveHandler {
     /**
      * Takes a list of DataItemJson objects and bundles them into a Transaction.
      * @param items List of DataItemJson objects.
+     * @param chain The name of the chain being archived.
+     * @param genHash The genesis hash of the chain being archived.
      * @param start Block number of earliest block.
      * @param end Block number of last block.
      * @param compress Whether to compress the block or not.
      */
 
-    public async createTxnFromBundle(items: DataItemJson[], start: number, end: number, compress = true): Promise<Transaction> {
+    public async createTxnFromBundle(items: DataItemJson[], chain: string, genHash: string, start: number, end: number, compress = true): Promise<Transaction> {
         let txn: Transaction;
         if (compress) {
             txn = await this.arweave.createTransaction({ data: await compressBundle(await this.arBundles.bundleData(items)) }, this.wallet);
@@ -127,7 +135,9 @@ export class ArweaveHandler {
         this.addBundleTags(txn, {
             compressed: compress,
             startBlock: start.toString(),
-            endBlock: start.toString()
+            endBlock: start.toString(),
+            chain: chain,
+            genHash: genHash
         });
         await this.arweave.transactions.sign(txn, this.wallet);
         return txn;

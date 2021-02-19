@@ -26,12 +26,12 @@ export class FileManager {
                 }
                 catch (e) {
                     console.error(colors.red("Error creating/hiding the temp directory: " + e));
-                    process.exit(-1);
+                    throw new Error();
                 }
             }
             else {
                 console.error(colors.red("Error checking if temp directory exists: " + e));
-                process.exit(-1);
+                throw new Error();
             }
         }
     }
@@ -59,7 +59,7 @@ export class FileManager {
             }
             catch (e) {
                 console.error(colors.red("Error reading the file " + newPath + ". Error: " + e));
-                process.exit(-1);
+                throw new Error();
             }
             try {
                 return <DataItemJson>JSON.parse(fileData);
@@ -82,7 +82,7 @@ export class FileManager {
         }
         catch (e) {
             console.error(colors.red("Error writing the file " + newPath + ". Error: " + e));
-            process.exit(-1);
+            throw new Error();
         }
     }
 
@@ -95,7 +95,7 @@ export class FileManager {
         }
         catch (e) {
             console.error(colors.red("Error reading the directory " + this.dirPath + ". Error: " + e));
-            process.exit(-1);
+            throw new Error();
         }
         async.each(files, async (file) => {
             const newPath = path.join(this.dirPath, file);
@@ -104,7 +104,7 @@ export class FileManager {
             }
             catch (e) {
                 console.error(colors.red("Error removing the file " + newPath + ". Error: " + e));
-                process.exit(-1);
+                throw new Error();
             }
         })
     }

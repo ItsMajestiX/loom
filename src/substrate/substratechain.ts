@@ -18,6 +18,22 @@ export class SubstrateChain {
         this.genHash = genHash
     }
 
+    // This code copied from https://spin.atomicobject.com/2020/01/16/timeout-promises-nodejs/ and modified
+    private static promiseWithTimeout <T>(timeoutMs: number, promise: Promise<T>, failureMessage?: string) { 
+        let timeoutHandle: NodeJS.Timeout;
+        const timeoutPromise = new Promise<never>((resolve, reject) => {
+            timeoutHandle = setTimeout(() => reject(new Error(failureMessage)), timeoutMs);
+        });
+      
+        return Promise.race([ 
+            promise, 
+            timeoutPromise, 
+        ]).then((result) => {
+            clearTimeout(timeoutHandle);
+            return result;
+        }); 
+    }
+
     /**
      * Creates a new instance of SubstrateChain
      * @param wsUrl The WebSockets RPC URL of the node to connect to.
@@ -25,7 +41,16 @@ export class SubstrateChain {
     public static async create(wsUrl: string): Promise<SubstrateChain | undefined> {
         const wsProvider = new WsProvider(wsUrl);
         try {
-            const api = await ApiPromise.create({ provider: wsProvider });
+            const api = await SubstrateChain.promiseWithTimeout(10000, ApiPromise.create({ provider: wsProvider }), 
+            "Timed out connecting to the substrate node. Check your node address.");
+            try {
+                // Should catch non-archive nodes
+                api.rpc.chain.getBlockHash(5);
+            }
+            catch {
+                console.error(colors.red("The substrate node provided is not an archive node."));
+                throw new Error();
+            }
             const constructed = new SubstrateChain(api, api.genesisHash.toHex(), (await api.rpc.system.chain()).toString());
             if (!(constructed.api instanceof ApiPromise)) {
                 return undefined;
@@ -33,7 +58,8 @@ export class SubstrateChain {
             return constructed;
         }
         catch (e) {
-            console.error(colors.red("Error connecting to Substrate node: " + e))
+            console.error(colors.red("Error connecting to Substrate node: " + e));
+            throw new Error();
         }
     }
 
@@ -41,7 +67,6 @@ export class SubstrateChain {
      * Gets the current block number.
      */
     public async getCurrentBlockNumber(): Promise<number> {
-        this.api = <ApiPromise>this.api;
         return (await this.api.rpc.chain.getHeader()).number.toNumber();
     }
 
@@ -50,10 +75,9 @@ export class SubstrateChain {
      * @param number The block to get.
      */
     public async getBlock(number: number): Promise<Block> {
-        this.api = <ApiPromise>this.api;
         const hash = await this.api.rpc.chain.getBlockHash(number);
         const block = await this.api.derive.chain.getBlock(hash);
-        return new Block(block!, hash!, chain, this.api.genesisHash.toHex());
+        return new Block(block!, hash!, this.chain, this.genHash);
     }
 
     /**
@@ -61,10 +85,8 @@ export class SubstrateChain {
      * @param callback The function to call when a new block is recieved. Funtion must take one parameter of type Block and return void.
      */
     public async livestreamBlocks(callback: (block: Block) => void | Promise<void>): Promise<VoidFn> {
-        this.api = <ApiPromise>this.api;
         return await this.api.derive.chain.subscribeNewBlocks((block) => {
-            this.api = <ApiPromise>this.api;
-            callback(new Block(block, block.block.header.hash,));
+            callback(new Block(block, block.block.header.hash, this.chain, this.genHash));
         });
     }
 }

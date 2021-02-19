@@ -21,7 +21,7 @@ export async function compressBundle(bundle: { items: DataItemJson[] }): Promise
     }
     catch (e) {
         console.error(colors.red("Error compressing bundle: " + e));
-        process.exit(-1);
+        throw new Error();
     }
 }
 
@@ -33,6 +33,6 @@ export async function decompressBundle(bundle: string): Promise<DataItemJson[]> 
     }
     catch (e) {
         console.error(colors.red("Error decompressing bundle: " + e));
-        process.exit(-1);
+        throw new Error();
     }
 }
