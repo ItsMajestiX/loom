@@ -47,10 +47,11 @@ export class ArweaveHandler {
 
     // Two seperate methods for two different ways to add tags
     private addTransactionTags(block: Block, txn: Transaction): void {
+        txn.addTag("User-Agent", "Loom");
         txn.addTag("chain", block.chain);
         txn.addTag("genHash", block.genHash);
-        txn.addTag("number", block.number.toString());
 
+        txn.addTag("number", block.number.toString());
         txn.addTag("hash", block.hash.toString());
         txn.addTag("parentHash", block.parentHash.toString());
         txn.addTag("stateRoot", block.stateRoot.toString());
@@ -65,8 +66,8 @@ export class ArweaveHandler {
     }
 
     private addDataItemTags(block: Block, txn: DataItemJson): void {
+        
         this.arBundles.addTag(txn, "number", block.number.toString());
-
         this.arBundles.addTag(txn, "hash", block.hash.toString());
         this.arBundles.addTag(txn, "parentHash", block.parentHash.toString());
         this.arBundles.addTag(txn, "stateRoot", block.stateRoot.toString());
@@ -87,6 +88,7 @@ export class ArweaveHandler {
         txn.addTag('Content-Type', 'application/json');
 
         // Extra data
+        txn.addTag("User-Agent", "Loom");
         txn.addTag("chain", settings.chain);
         txn.addTag("genHash", settings.genHash);
         txn.addTag("compressed", settings.compressed ? "true" : "false");

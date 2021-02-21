@@ -50,7 +50,7 @@ const raw = yargs(process.argv.slice(2)).options({
 	library: {
 		alias: "library-mode",
 		desc: "Enable library mode. Either this or -a must be set. Will allow blocks uploaded to be queried via ArQL/GraphQL. However, this is less efficent and costs more in transaction fees.",
-		conflicts: ['a', 'b', 'c'],
+		conflicts: ['archive', 'b', 'c'],
 		type: "boolean"
 	},
 	archive: {
@@ -63,33 +63,33 @@ const raw = yargs(process.argv.slice(2)).options({
 	stream: {
 		alias: "livestream",
 		desc: "Enable streaming mode. As soon as your node recieves a new block, it will either be added to the current bundle or immidiately uploaded.",
-		conflicts: ['S', 'E'],
+		conflicts: ['s', 'e'],
 		type: "boolean"
 	},
 	b: {
 		alias: "bundle-size",
 		desc: "Set the size of the bundle in blocks.",
-		conflicts: ['l'],
-		implies: ['a'],
+		conflicts: ['library'],
+		implies: ['archive'],
 		type: "number"
 	},
 	s: {
 		alias: "start",
 		desc: "The block to start archiving at.",
-		conflicts: ['s'],
+		conflicts: ['stream'],
 		type: "number"
 	},
 	e: {
 		alias: "end",
 		desc: "The block to end archiving at. If not specified, will switch to livestream mode after all blocks uploaded.",
-		conflicts: ['s'],
+		conflicts: ['stream'],
 		type: "number"
 	},
 	c: {
 		alias: "compression",
 		desc: "Enable compression in archive mode. Highly recommended.",
-		conflicts: ['l'],
-		implies: ['a'],
+		conflicts: ['library'],
+		implies: ['archive'],
 		type: "boolean"
 	},
 	t: {
@@ -106,7 +106,7 @@ const raw = yargs(process.argv.slice(2)).options({
 	},
 	w: {
 		alias: ["wipe", "clear"],
-		desc: "Whether to clear the data in the datadir when done.",
+		desc: "Whether to clear the data in the datadir when done. Recommended to have this set when using a local node.",
 		type: "boolean"
 	}
 }).argv;
@@ -116,10 +116,10 @@ function getArgs(): CommandType {
 		console.error(colors.red("ERROR: One of --library or -archive must be specifed."));
 		throw new Error();
 	}
-	if (raw.archive && !raw.stream) {
-		raw.S = 0;
+	if (raw.archive && !raw.stream && !raw.s) {
+		raw.s = 0;
 	}
-	if (!raw.library) {
+	if (!raw.library && !raw.b) {
 		raw.b = 10;
 	}
 	return raw;

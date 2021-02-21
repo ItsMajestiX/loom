@@ -24,7 +24,8 @@ export class Block {
     readonly logs: BlockLog[];
 
     constructor(block: SignedBlockExtended, hash: BlockHash, chain: string, genHash: string) {
-        if (block?.block.extrinsics.length) {
+        if (block?.block.extrinsics.length && block?.block.extrinsics[0].method.section === "timestamp") {
+            console.log("swag route")
             this.time = +block?.block.extrinsics[0].args[0].toString();
         }
 

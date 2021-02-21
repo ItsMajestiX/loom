@@ -38,7 +38,7 @@ export class SubstrateChain {
      * Creates a new instance of SubstrateChain
      * @param wsUrl The WebSockets RPC URL of the node to connect to.
      */
-    public static async create(wsUrl: string): Promise<SubstrateChain | undefined> {
+    public static async create(wsUrl: string): Promise<SubstrateChain> {
         const wsProvider = new WsProvider(wsUrl);
         try {
             const api = await SubstrateChain.promiseWithTimeout(10000, ApiPromise.create({ provider: wsProvider }), 
@@ -52,9 +52,6 @@ export class SubstrateChain {
                 throw new Error();
             }
             const constructed = new SubstrateChain(api, api.genesisHash.toHex(), (await api.rpc.system.chain()).toString());
-            if (!(constructed.api instanceof ApiPromise)) {
-                return undefined;
-            }
             return constructed;
         }
         catch (e) {
