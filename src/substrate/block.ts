@@ -25,7 +25,7 @@ export class Block {
 
     constructor(block: SignedBlockExtended, hash: BlockHash, chain: string, genHash: string) {
         if (block?.block.extrinsics.length && block?.block.extrinsics[0].method.section === "timestamp") {
-            console.log("swag route")
+            // remember to remove stupid console.log statements before commiting
             this.time = +block?.block.extrinsics[0].args[0].toString();
         }
 

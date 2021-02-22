@@ -95,7 +95,6 @@ const raw = yargs(process.argv.slice(2)).options({
 	t: {
 		alias: "test",
 		desc: "Turns on test mode, which disables transactions and prints debug info.",
-		default: true,
 		type: "boolean"
 	},
 	d: {
@@ -172,7 +171,7 @@ export interface CommandType {
 	/**
 	 * test
 	 */
-	t: boolean;
+	t: boolean | undefined;
 	/**
 	 * datadir
 	 */

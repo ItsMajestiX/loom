@@ -5,6 +5,7 @@ import { DataItemJson } from "arweave-bundles";
 import { argv } from "./cli/commands";
 import { FileManager } from "./cli/files";
 import { Block } from "./substrate/block";
+import colors from "colors/safe";
 
 class State {
     readonly substrate: SubstrateChain;
@@ -45,7 +46,15 @@ async function submit(state: State) {
     const txn = await state.arweave.createTxnFromBundle(blocks, state.substrate.chain, state.substrate.genHash, state.s, state.e, true);
     // Test mode check
     if (!argv.t) {
+        const bal = +state.arweave.arweave.ar.arToWinston(await state.arweave.getBalance());
+        const cost = +txn.reward
+        if (bal < cost) {
+            console.log(colors.red("Error: Balance of " + state.arweave.arweave.ar.winstonToAr(bal.toString()) + 
+            " AR is insufficent to send data costing " + state.arweave.arweave.ar.winstonToAr(cost.toString()) + " AR."))
+            throw new Error();
+        }
         await state.arweave.submitTxn(txn);
+        console.log(colors.green("Current balance: " + await state.arweave.getBalance() + " AR."));
         if (argv.w) {
             await state.files.wipeBlocks();
         }
@@ -121,6 +130,8 @@ async function main(): Promise<void> {
 
     let state = new State(substrate, arweave, files);
 
+    console.log(colors.green("Current balance: " + await state.arweave.getBalance() + " AR."));
+
     do {
         if (!argv.stream || state.catchUp) {
             // Block loop
@@ -147,9 +158,4 @@ async function main(): Promise<void> {
     }
 }
 
-try {
-    main();
-}
-catch {
-    process.exit(-1);
-}
+main().catch(() => { process.exit(-1); });
