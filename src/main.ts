@@ -32,7 +32,7 @@ class State {
     }
 }
 
-async function submit(state: State) {
+async function submitBundle(state: State) {
     // Read blocks from disk
     let blocks = new Array<DataItemJson>();
     for (let i = state.s; i <= state.e; i++) {
@@ -45,7 +45,7 @@ async function submit(state: State) {
             blocks.push(block);
         }
     }
-    const txn = await state.arweave.createTxnFromBundle(blocks, state.substrate.chain, state.substrate.genHash, state.s, state.e, true);
+    const txn = await state.arweave.createTxnFromBundle(blocks, state.substrate.chain, state.substrate.genHash, state.s, state.e, argv.c);
     // Test mode check
     if (!argv.t) {
         const bal = +state.arweave.arweave.ar.arToWinston(await state.arweave.getBalance());
@@ -90,6 +90,7 @@ async function submitOneBlock(block: Block, state: State): Promise<void> {
     // Library mode check
     if (argv.library) {
         const txn = <Transaction>await state.arweave.createTxnFromBlock(block, false);
+        txn.data_tree = [];
         // Test mode check
         if (!argv.t) {
             await state.arweave.submitTxn(txn);
@@ -116,7 +117,7 @@ async function submitOneBlock(block: Block, state: State): Promise<void> {
         }
         // Blocks per bundle
         if (state.blocksAdded >= argv.b!) {
-            await submit(state);
+            await submitBundle(state);
         }
     }
 }
@@ -126,7 +127,7 @@ async function main(): Promise<void> {
     const arweave = await new ArweaveHandler({
         host: argv.a.hostname,
         port: argv.a.port,
-        protocol: argv.a.protocol.slice(0, argv.a.protocol.length - 2)
+        protocol: argv.a.protocol.slice(0, argv.a.protocol.length - 1)
     }, argv.k);
     const files = new FileManager(argv.d);
 
@@ -142,7 +143,10 @@ async function main(): Promise<void> {
                 state.globalE = await state.substrate.getCurrentBlockNumber();
                 state.streamWhenDone = true;
             }
-            for (let i = state.globalS!; i <= state.globalE!; i++) {
+            else {
+                state.globalE = argv.e;
+            }
+            for (let i = state.globalS; i <= state.globalE; i++) {
                 await submitOneBlock(await state.substrate.getBlock(i), state);
             }
         }
@@ -156,8 +160,13 @@ async function main(): Promise<void> {
 
     // Send remaining transactions, if there are any
     if (state.blocksAdded !== 0) {
-        await submit(state);
+        await submitBundle(state);
     }
 }
 
-main().catch(() => { process.exit(-1); });
+main().catch((e) => { 
+    if (argv.t) {
+        console.error(e);
+    }
+    process.exit(-1);
+});
