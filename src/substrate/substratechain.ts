@@ -51,7 +51,7 @@ export class SubstrateChain {
                 console.error(colors.red("The substrate node provided is not an archive node."));
                 throw new Error();
             }
-            const constructed = new SubstrateChain(api, api.genesisHash.toHex(), (await api.rpc.system.chain()).toString());
+            const constructed = new SubstrateChain(api, (await api.rpc.system.chain()).toString(), api.genesisHash.toHex());
             return constructed;
         }
         catch (e) {

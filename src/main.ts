@@ -94,6 +94,7 @@ async function submitOneBlock(block: Block, state: State): Promise<void> {
         // Test mode check
         if (!argv.t) {
             await state.arweave.submitTxn(txn);
+            console.log(colors.green("Current balance: " + await state.arweave.getBalance() + " AR."));
             await catchUp(state);
         }
         else {
