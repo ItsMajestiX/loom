@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { SubstrateChain } from "./substrate/substratechain";
 import { ArweaveHandler } from "./arweave/arweavehandler"
 import Transaction from 'arweave/node/lib/transaction';
@@ -12,16 +14,16 @@ class State {
     readonly arweave: ArweaveHandler;
     readonly files: FileManager;
 
-    s: number = Infinity;
-    e: number = -Infinity;
+    s = Infinity;
+    e = -Infinity;
 
-    globalS: number = 0;
-    globalE: number = Infinity;
+    globalS = 0;
+    globalE = Infinity;
 
-    blocksAdded: number = 0;
+    blocksAdded = 0;
 
-    streamWhenDone: boolean = false;
-    catchUp: boolean = false;
+    streamWhenDone = false;
+    catchUp = false;
 
     constructor (substrate: SubstrateChain, arweave: ArweaveHandler, files: FileManager) {
         this.substrate = substrate;
@@ -128,7 +130,7 @@ async function main(): Promise<void> {
     }, argv.k);
     const files = new FileManager(argv.d);
 
-    let state = new State(substrate, arweave, files);
+    const state = new State(substrate, arweave, files);
 
     console.log(colors.green("Current balance: " + await state.arweave.getBalance() + " AR."));
 

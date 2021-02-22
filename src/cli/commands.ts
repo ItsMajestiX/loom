@@ -1,9 +1,8 @@
 import fs from 'fs';
 
-import yargs, { boolean } from 'yargs';
+import yargs from 'yargs';
 
 import colors from "colors/safe";
-import { BlockLog } from '../substrate/log';
 
 
 const raw = yargs(process.argv.slice(2)).options({
