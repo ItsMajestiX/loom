@@ -14,10 +14,22 @@ const arBundles = ArweaveBundles({
     deepHash: deepHash,
 });
 
+const compressSettings:zlib.BrotliOptions = {
+    [zlib.constants.BROTLI_PARAM_MODE]: zlib.constants.BROTLI_MODE_TEXT,
+    [zlib.constants.BROTLI_PARAM_QUALITY]: 10
+}
+
 export async function compressBundle(bundle: { items: DataItemJson[] }): Promise<Buffer> {
     const brotliCompressPromise = util.promisify(zlib.brotliCompress);
     try {
-        return await brotliCompressPromise(JSON.stringify(bundle));
+        const data = JSON.stringify(bundle);
+        return await brotliCompressPromise(data, {
+            [zlib.constants.BROTLI_PARAM_MODE]: zlib.constants.BROTLI_MODE_TEXT,
+            // https://www.lucidchart.com/techblog/2019/12/06/json-compression-alternative-binary-formats-and-compression-methods/
+            [zlib.constants.BROTLI_PARAM_QUALITY]: 10,
+            // Approximation
+            [zlib.constants.BROTLI_PARAM_SIZE_HINT]: data.length
+        });
     }
     catch (e) {
         console.error(colors.red("Error compressing bundle: " + e));

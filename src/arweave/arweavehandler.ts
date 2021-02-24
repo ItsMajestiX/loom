@@ -49,7 +49,7 @@ export class ArweaveHandler {
         return this.arweave.ar.winstonToAr(await this.arweave.wallets.getBalance(await this.arweave.wallets.jwkToAddress(this.wallet)), { formatted: true });
     }
 
-    // Two seperate methods for two different ways to add tags
+    // Two separate methods for two different ways to add tags
     private addTransactionTags(block: Block, txn: Transaction): void {
         txn.addTag("User-Agent", "Loom");
         txn.addTag("chain", block.chain);

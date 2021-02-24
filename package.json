@@ -1,12 +1,14 @@
 {
   "name": "@itsmajestix/loom",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "A bridge between the Polkadot network and the Arweave network.",
   "main": "./out/index.js",
   "types": "./out/index.d.ts",
   "scripts": {
     "build": "npx tsc",
-    "lint": "tsc --noEmit --pretty"
+    "lint": "npx eslint \"**\\*.ts\" --fix",
+    "lint-nofix": "npx eslint \"**\\*.ts\"",
+    "test": "npx mocha"
   },
   "bin": {
     "loom": "./out/main.js"

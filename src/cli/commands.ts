@@ -48,33 +48,33 @@ const raw = yargs(process.argv.slice(2)).options({
 	},
 	library: {
 		alias: "library-mode",
-		desc: "Enable library mode. Either this or -a must be set. Will allow blocks uploaded to be queried via ArQL/GraphQL. However, this is less efficent and costs more in transaction fees.",
+		desc: "Enable library mode. Either this or --archive must be set. Will allow blocks uploaded to be queried via ArQL/GraphQL. However, this is less efficient and costs more in transaction fees.",
 		conflicts: ['archive', 'b', 'c'],
 		type: "boolean"
 	},
 	archive: {
 		alias: "archive-mode",
-		desc: "Enable archive mode. Either this or -l must be set. Uploads two or more blocks at a time as a bundle. However, blocks uploaded this way cannot be interacted with directly.",
-		conflicts: ['l'],
+		desc: "Enable archive mode. Either this or --library must be set. Uploads two or more blocks at a time as a bundle. However, blocks uploaded this way cannot be interacted with directly.",
+		conflicts: ['library'],
 		implies: ['b', 'c'],
 		type: "boolean"
 	},
 	stream: {
 		alias: "livestream",
-		desc: "Enable streaming mode. As soon as your node recieves a new block, it will either be added to the current bundle or immidiately uploaded.",
+		desc: "Enable streaming mode. As soon as your node receives a new block, it will either be added to the current bundle or immediately uploaded.",
 		conflicts: ['s', 'e'],
 		type: "boolean"
 	},
 	b: {
 		alias: "bundle-size",
-		desc: "Set the size of the bundle in blocks.",
+		desc: "Sets the size of the bundle in blocks.",
 		conflicts: ['library'],
 		implies: ['archive'],
 		type: "number"
 	},
 	s: {
 		alias: "start",
-		desc: "The block to start archiving at.",
+		desc: "The block to start archiving at. Defaults to 0 if not set.",
 		conflicts: ['stream'],
 		type: "number"
 	},
@@ -98,7 +98,7 @@ const raw = yargs(process.argv.slice(2)).options({
 	},
 	d: {
 		alias: "datadir",
-		desc: "The directory to save temp data to, such as downloaded blocks and program state. Will be created if it does not exist.",
+		desc: "The directory to save data to, such as downloaded blocks and program state. Will be created if it does not exist.",
 		default: "./.loomdata/",
 		type: "string"
 	},
@@ -111,7 +111,7 @@ const raw = yargs(process.argv.slice(2)).options({
 
 function getArgs(): CommandType {
 	if (!raw.library && !raw.archive) {
-		console.error(colors.red("ERROR: One of --library or -archive must be specifed."));
+		console.error(colors.red("ERROR: One of --library or -archive must be specified."));
 		throw new Error();
 	}
 	if (raw.archive && !raw.stream && !raw.s) {

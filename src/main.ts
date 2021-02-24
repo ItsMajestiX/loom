@@ -52,7 +52,7 @@ async function submitBundle(state: State) {
         const cost = +txn.reward
         if (bal < cost) {
             console.log(colors.red("Error: Balance of " + state.arweave.arweave.ar.winstonToAr(bal.toString()) + 
-            " AR is insufficent to send data costing " + state.arweave.arweave.ar.winstonToAr(cost.toString()) + " AR."))
+            " AR is insufficient to send data costing " + state.arweave.arweave.ar.winstonToAr(cost.toString()) + " AR."))
             throw new Error();
         }
         await state.arweave.submitTxn(txn);

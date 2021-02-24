@@ -11,16 +11,17 @@ before(async function() {
 describe('Substrate', function() {
 	describe('eventutil.ts', function() {
 		it('isSuccess should return true when the last event is ExtrinsicSuccess', async function() {
-				const api = await helpers.api;
-				const hash = await api.rpc.chain.getBlockHash(helpers.EVENTUTIL_SUCCESS[0]);
-				const block = await api.derive.chain.getBlock(hash);
-				helpers.expect(eventUtil.isSuccess(block.extrinsics[helpers.EVENTUTIL_SUCCESS[1]].events)).to.equal(true);
+			this.timeout(5000);
+			const api = await helpers.api;
+			const hash = await api.rpc.chain.getBlockHash(helpers.EVENTUTIL_SUCCESS[0]);
+			const block = await api.derive.chain.getBlock(hash);
+			helpers.expect(eventUtil.isSuccess(block.extrinsics[helpers.EVENTUTIL_SUCCESS[1]].events)).to.equal(true);
 		});
 		it('isSuccess should return false when the last event is ExtrinsicFailure', async function() {
-				const api = await helpers.api;
-				const hash = await api.rpc.chain.getBlockHash(helpers.EVENTUTIL_FAILURE[0]);
-				const block = await api.derive.chain.getBlock(hash);
-				helpers.expect(eventUtil.isSuccess(block.extrinsics[helpers.EVENTUTIL_FAILURE[1]].events)).to.equal(false);
+			const api = await helpers.api;
+			const hash = await api.rpc.chain.getBlockHash(helpers.EVENTUTIL_FAILURE[0]);
+			const block = await api.derive.chain.getBlock(hash);
+			helpers.expect(eventUtil.isSuccess(block.extrinsics[helpers.EVENTUTIL_FAILURE[1]].events)).to.equal(false);
 		});
 	});
 	describe("substratechain.ts", function() {
@@ -66,8 +67,16 @@ describe('Substrate', function() {
 		});
 		it("Block object should have the correct properties", function() {
 			Object.keys(helpers.BLOCK_PROPERTIES).forEach((s) => {
-				if (helpers.BLOCK_PROPERTIES[s].toString() !== block[s].toString()) {
-					throw new Error("Specified " + s + " of " + helpers.BLOCK_PROPERTIES[s].toString() + "did not equal retrieved " + s + " of " + block[s].toString() + ".");
+				try {
+					if (!((s === "author" || s === "time") && block[s] === undefined)) {
+						if (helpers.BLOCK_PROPERTIES[s].toString() !== block[s].toString()) {
+							throw new Error("Specified " + s + " of " + helpers.BLOCK_PROPERTIES[s].toString() + "did not equal retrieved " + s + " of " + block[s].toString() + ".");
+						}
+					}
+				}
+				catch (e) {
+					console.error("Test failed on key " + s + ".");
+					throw e;
 				}
 			});
 		});

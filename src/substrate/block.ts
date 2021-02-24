@@ -25,7 +25,7 @@ export class Block {
 
     constructor(block: SignedBlockExtended, hash: BlockHash, chain: string, genHash: string) {
         if (block?.block.extrinsics.length && block?.block.extrinsics[0].method.section === "timestamp") {
-            // remember to remove stupid console.log statements before commiting
+            // remember to remove stupid console.log statements before committing
             this.time = +block?.block.extrinsics[0].args[0].toString();
         }
 
@@ -44,9 +44,9 @@ export class Block {
         this.logs = new Array<BlockLog>();
 
         let eventCount = 0;
-        block.extrinsics.forEach((extrisic, index) => {
-            this.extrinsics.push(new BlockExtrinsic(extrisic, index, eventCount));
-            extrisic.events.forEach((e) => {
+        block.extrinsics.forEach((extrinsic, index) => {
+            this.extrinsics.push(new BlockExtrinsic(extrinsic, index, eventCount));
+            extrinsic.events.forEach((e) => {
                 this.events.push(new BlockEvent(e, eventCount, index));
                 eventCount += 1;
             }, this);
