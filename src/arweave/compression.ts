@@ -41,7 +41,7 @@ export async function decompressBundle(bundle: string): Promise<DataItemJson[]> 
     const brotliDecompressPromise = util.promisify(zlib.brotliDecompress);
     try {
         const data = await brotliDecompressPromise(bundle);
-        return arBundles.unbundleData(data);
+        return arBundles.unbundleData(data.toString());
     }
     catch (e) {
         console.error(colors.red("Error decompressing bundle: " + e));
