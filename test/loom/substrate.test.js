@@ -1,7 +1,7 @@
 const helpers = require("./helpers");
 
-const eventUtil = require("../out/substrate/eventutil");
-const substrateChain = require("../out/substrate/substratechain").SubstrateChain;
+const eventUtil = require("../../out/substrate/eventutil");
+const substrateChain = require("../../out/substrate/substratechain").SubstrateChain;
 
 before(async function() {
 	this.timeout(5000);
