@@ -79,7 +79,7 @@ export class SubstrateChain {
 
     /**
      * Listens for new blocks and calls a callback function when one is received.
-     * @param callback The function to call when a new block is recieved. Function must take one parameter of type Block and return void.
+     * @param callback The function to call when a new block is received. Function must take one parameter of type Block and return void.
      */
     public async livestreamBlocks(callback: (block: Block) => void | Promise<void>): Promise<VoidFn> {
         return await this.api.derive.chain.subscribeNewBlocks((block) => {

@@ -33,7 +33,6 @@ export class Block {
         this.genHash = genHash;
         
         this.number = block.block.header.number.toNumber();
-
         this.hash = hash;
         this.parentHash = block.block.header.parentHash;
         this.stateRoot = block.block.header.stateRoot;

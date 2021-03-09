@@ -14,11 +14,6 @@ const arBundles = ArweaveBundles({
     deepHash: deepHash,
 });
 
-const compressSettings:zlib.BrotliOptions = {
-    [zlib.constants.BROTLI_PARAM_MODE]: zlib.constants.BROTLI_MODE_TEXT,
-    [zlib.constants.BROTLI_PARAM_QUALITY]: 10
-}
-
 export async function compressBundle(bundle: { items: DataItemJson[] }): Promise<Buffer> {
     const brotliCompressPromise = util.promisify(zlib.brotliCompress);
     try {
@@ -37,7 +32,7 @@ export async function compressBundle(bundle: { items: DataItemJson[] }): Promise
     }
 }
 
-export async function decompressBundle(bundle: string): Promise<DataItemJson[]> {
+export async function decompressBundle(bundle: Uint8Array): Promise<DataItemJson[]> {
     const brotliDecompressPromise = util.promisify(zlib.brotliDecompress);
     try {
         const data = await brotliDecompressPromise(bundle);
