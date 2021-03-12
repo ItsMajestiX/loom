@@ -1,9 +1,7 @@
 import Arweave from "arweave";
 import { ApiConfig } from "arweave/node/lib/api";
-import { sendGraphQLQuery as _sendGraphQLQuery, getBlocksFromArweave as _getBlocksFromArweave, getBundlesFromArweave as _getBundlesFromArweave } from "./library/graphql";
-import { GraphQLResponseType, BundleList } from "./library/graphql";
-import { BlockInfo, BundleInfo, GraphQLSearchOptions, SortOrder } from "./library/interfaces";
-import { Block } from "./substrate/block";
+import { sendGraphQLQuery as _sendGraphQLQuery, getBlocksFromArweave as _getBlocksFromArweave, getBundlesFromArweave as _getBundlesFromArweave} from "./library/graphql";
+import { BlockInfo, BundleInfo, BundleList, GraphQLResponseType, GraphQLSearchOptions, PaginatedBlock, SortOrder } from "./library/interfaces";
 
 class Loom {
     ar: Arweave;
@@ -16,7 +14,7 @@ class Loom {
         return await _sendGraphQLQuery(this.ar, query);
     }
 
-    async getBlocksFromArweave(query: BlockInfo, filters?: GraphQLSearchOptions): Promise<Block[]> {
+    async getBlocksFromArweave(query: BlockInfo, filters?: GraphQLSearchOptions): Promise<PaginatedBlock[]> {
         return await _getBlocksFromArweave(this.ar, query, filters);
     }
 

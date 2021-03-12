@@ -2,6 +2,9 @@
  * Properties that Arweave transactions have.
  */
 
+import { DataItemJson } from "arweave-bundles";
+import { Block } from "../substrate/block";
+
 
 /**
  * The interface an object should conform to when using it as a filter for things like GraphQL or searching for blocks in a bundle.
@@ -34,6 +37,7 @@ export interface BlockRange {
     min: number;
     max: number;
 }
+
 export enum SortOrder {
     HEIGHT_ASC = "HEIGHT_ASC",
     HEIGHT_DESC = "HEIGHT_DESC"
@@ -44,4 +48,37 @@ export interface GraphQLSearchOptions {
     block?: BlockRange;
     first?: number;
     sort?: SortOrder;
+    after?: string;
+}
+
+export interface ItemInfo {
+    id: string;
+    cursor: string;
+}
+
+export interface GraphQLResponseType {
+    "data": {
+        "transactions": {
+            "edges": [{
+                "node": {
+                    "tags": [{
+                        "name": string;
+                        "value": string;
+                    }]
+                    "id": string;
+                }
+                "cursor": string;
+            }]
+        }
+    }
+}
+
+export interface BundleList {
+    info: ItemInfo;
+    items: DataItemJson[];
+}
+
+export interface PaginatedBlock {
+    info: ItemInfo;
+    block: Block;
 }

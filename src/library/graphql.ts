@@ -1,7 +1,7 @@
 import Arweave from 'arweave';
 import async from 'async';
 import { Block } from '../substrate/block';
-import { BlockInfo, BundleInfo, GraphQLSearchOptions, BlockRange } from './interfaces';
+import { BlockInfo, BundleInfo, BundleList, GraphQLResponseType, GraphQLSearchOptions, PaginatedBlock} from './interfaces';
 import deepHash from 'arweave/node/lib/deepHash';
 import ArweaveBundles, { DataItemJson } from 'arweave-bundles';
 import { decompressBundle } from '../arweave/compression';
@@ -13,26 +13,6 @@ const deps = {
 }
 
 const arBundles = ArweaveBundles(deps);
-
-export interface GraphQLResponseType {
-    "data": {
-        "transactions": {
-            "edges": [{
-                "node": {
-                    "tags": [{
-                        "name": string;
-                        "value": string;
-                    }]
-                    "id": string;
-                }
-            }]
-        }
-    }
-}
-
-export interface BundleList {
-    [id: string]: DataItemJson[]
-}
 
 // This is super inefficient and complicated but it works
 // https://stackoverflow.com/q/29600539, https://www.nadershamma.dev/blog/2019/how-to-access-object-properties-dynamically-using-bracket-notation-in-typescript/
@@ -55,7 +35,7 @@ function constructGraphQLQuery<A extends BlockInfo | BundleInfo, B extends Graph
         tagString += '{name: "' + key + '", values: ' + JSON.stringify(tags[key as keyof A]) + '},'
     });
     tagString = tagString.slice(0, tagString.length - 1);
-    return 'query { transactions(tags: [' + tagString + '], ' + searchOptionString + ') { edges { node { tags { name value } id }}}}'
+    return 'query { transactions(tags: [' + tagString + '], ' + searchOptionString + ') { edges { node { tags { name value } id } cursor }}}'
 }
 
 export async function sendGraphQLQuery(ar: Arweave, query: string): Promise<GraphQLResponseType> {
@@ -63,12 +43,12 @@ export async function sendGraphQLQuery(ar: Arweave, query: string): Promise<Grap
     return <GraphQLResponseType> response.data;
 }
 
-export async function getBlocksFromArweave(ar: Arweave, query: BlockInfo, filters?: GraphQLSearchOptions): Promise<Block[]> {
-    let blocks = new Array<Block>();
+export async function getBlocksFromArweave(ar: Arweave, query: BlockInfo, filters?: GraphQLSearchOptions): Promise<PaginatedBlock[]> {
+    let blocks = new Array<PaginatedBlock>();
     const response = await sendGraphQLQuery(ar, constructGraphQLQuery(query, filters));
     await async.each(response.data.transactions.edges, async edge => {
         const block = <string> await ar.transactions.getData(edge.node.id, {decode: true, string: true});
-        blocks.push(<Block> JSON.parse(block));
+        blocks.push({info: {id: edge.node.id, cursor: edge.cursor}, block: <Block> JSON.parse(block)});
     });
     return blocks;
 }
@@ -86,9 +66,7 @@ export async function getBundlesFromArweave(ar: Arweave, query: BundleInfo, filt
         else {
             bundle = await arBundles.unbundleData(new TextDecoder().decode(bundleData));
         }
-        // Doesn't work if you try to do this the short way
-        const id = edge.node.id
-        bundles.push({id: bundle})
+        bundles.push({info: {id: edge.node.id, cursor: edge.cursor}, items: bundle});
     });
     return bundles;
 }
